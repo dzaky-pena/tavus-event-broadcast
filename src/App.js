@@ -190,43 +190,85 @@ function App() {
     if (message.message_type === 'conversation' && message.event_type === 'conversation.replica.started_speaking') {
       setIsStatusVisible("NEUTRAL");
       setStatus('Last Event Broadcasted : conversation.replica.started_speaking');
-      toast.success('Event Broadcasted : conversation.replica.started_speaking', { duration: 5000});
+      toast.success('Event Broadcasted : ' + JSON.stringify(message, null, 2), {
+        duration: 5000,
+        style: {
+          whiteSpace: 'pre-wrap',
+          fontFamily: 'monospace',
+        },
+      });
     }
 
     if (message.message_type === 'conversation' && message.event_type === 'conversation.replica.stopped_speaking') {
       setIsStatusVisible("NEUTRAL");
       setStatus('Last Event Broadcasted : conversation.replica.stopped_speaking');
-      toast.success('Event Broadcasted : conversation.replica.stopped_speaking', { duration: 5000});
+      toast.success('Event Broadcasted : ' + JSON.stringify(message, null, 2), {
+        duration: 5000,
+        style: {
+          whiteSpace: 'pre-wrap',
+          fontFamily: 'monospace',
+        },
+      });
     }
 
     if (message.message_type === 'conversation' && message.event_type === 'conversation.user.started_speaking') {
       setIsStatusVisible("NEUTRAL");
       setStatus('Last Event Broadcasted : conversation.user.started_speaking');
-      toast.success('Event Broadcasted : conversation.user.started_speaking', { duration: 5000});
+      toast.success('Event Broadcasted : ' + JSON.stringify(message, null, 2), {
+        duration: 5000,
+        style: {
+          whiteSpace: 'pre-wrap',
+          fontFamily: 'monospace',
+        },
+      });
     }
 
     if (message.message_type === 'conversation' && message.event_type === 'conversation.user.stopped_speaking') {
       setIsStatusVisible("NEUTRAL");
       setStatus('Last Event Broadcasted : conversation.user.stopped_speaking');
-      toast.success('Event Broadcasted : conversation.user.stopped_speaking', { duration: 5000});
+      toast.success('Event Broadcasted : ' + JSON.stringify(message, null, 2), {
+        duration: 5000,
+        style: {
+          whiteSpace: 'pre-wrap',
+          fontFamily: 'monospace',
+        },
+      });
     }
     
     if (message.message_type === 'conversation' && message.event_type === 'conversation.utterance') {
       setIsStatusVisible("NEUTRAL");
       setStatus('Last Event Broadcasted : conversation.utterance');
-      toast.success('Event Broadcasted : conversation.utterance', { duration: 5000});
+      toast.success('Event Broadcasted : ' + JSON.stringify(message, null, 2), {
+        duration: 5000,
+        style: {
+          whiteSpace: 'pre-wrap',
+          fontFamily: 'monospace',
+        },
+      });
     }
 
     if (message.message_type === 'conversation' && message.event_type === 'conversation.replica_interrupted') {
       setIsStatusVisible("NEUTRAL");
       setStatus('Last Event Broadcasted : conversation.replica_interrupted');
-      toast.success('Event Broadcasted : conversation.replica_interrupted', { duration: 5000});
+      toast.success('Event Broadcasted : ' + JSON.stringify(message, null, 2), {
+        duration: 5000,
+        style: {
+          whiteSpace: 'pre-wrap',
+          fontFamily: 'monospace',
+        },
+      });
     }
 
     if (message.message_type === 'conversation' && message.event_type === 'conversation.perception_analysis') {
       setIsStatusVisible("NEUTRAL");
       setStatus('Last Event Broadcasted : conversation.perception_analysis');
-      toast.success('Event Broadcasted : conversation.perception_analysis', { duration: 5000});
+      toast.success('Event Broadcasted : ' + JSON.stringify(message, null, 2), {
+        duration: 5000,
+        style: {
+          whiteSpace: 'pre-wrap',
+          fontFamily: 'monospace',
+        },
+      });
       console.log('perception_analysis')
     }
     
@@ -234,7 +276,13 @@ function App() {
       const toolCall = message.properties;
       setIsStatusVisible("NEUTRAL");
       setStatus('Last Event Broadcasted : conversation.tool_call');
-      toast.success('Event Broadcasted : conversation.tool_call', { duration: 5000});
+      toast.success('Event Broadcasted : ' + JSON.stringify(message, null, 2), {
+        duration: 5000,
+        style: {
+          whiteSpace: 'pre-wrap',
+          fontFamily: 'monospace',
+        },
+      });
       
       if (!toolCall) {
         console.log('No tool call found in message properties');
