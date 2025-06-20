@@ -21,6 +21,7 @@ function App() {
   const [isStatusVisible, setIsStatusVisible] = useState(""); // "", "NEUTRAL", "SUCCESS", "FAILED"
   const [isConversationVisible, setIsConversationVisible] = useState(false);
   const [conversationUrl, setConversationUrl] = useState(null);
+  const [isScreenSharing, setIsScreenSharing] = useState(false);
 
   const API_KEY = process.env.REACT_APP_TAVUS_API_KEY;
 
@@ -163,6 +164,49 @@ function App() {
     } catch (err) {
       console.error('Error creating call:', err);
       throw err;
+    }
+  };
+
+  // Screen sharing functions
+  const startScreenShare = async () => {
+    const call = callRef.current;
+    if (!call) {
+      console.error('Call object not available');
+      return;
+    }
+
+    try {
+      await call.startScreenShare();
+      setIsScreenSharing(true);
+      toast.success('Screen sharing started', { duration: 3000 });
+    } catch (error) {
+      console.error('Error starting screen share:', error);
+      toast.error('Failed to start screen sharing: ' + error.message, { duration: 5000 });
+    }
+  };
+
+  const stopScreenShare = async () => {
+    const call = callRef.current;
+    if (!call) {
+      console.error('Call object not available');
+      return;
+    }
+
+    try {
+      await call.stopScreenShare();
+      setIsScreenSharing(false);
+      toast.success('Screen sharing stopped', { duration: 3000 });
+    } catch (error) {
+      console.error('Error stopping screen share:', error);
+      toast.error('Failed to stop screen sharing: ' + error.message, { duration: 5000 });
+    }
+  };
+
+  const toggleScreenShare = () => {
+    if (isScreenSharing) {
+      stopScreenShare();
+    } else {
+      startScreenShare();
     }
   };
 
@@ -377,6 +421,18 @@ function App() {
     }
   }, []);
 
+  const handleScreenShareStarted = useCallback(() => {
+    console.log('Screen share started');
+    setIsScreenSharing(true);
+    updateParticipants();
+  }, []);
+
+  const handleScreenShareStopped = useCallback(() => {
+    console.log('Screen share stopped');
+    setIsScreenSharing(false);
+    updateParticipants();
+  }, []);
+
   // Handle participants
   const updateParticipants = () => {
     const call = callRef.current;
@@ -404,10 +460,14 @@ function App() {
     Object.entries(remoteParticipants).forEach(([id, p]) => {
       // Video
       const videoEl = document.getElementById(`remote-video-${id}`);
-      if (videoEl && p.tracks.video && p.tracks.video.state === 'playable' && p.tracks.video.persistentTrack) {
-        videoEl.srcObject = new MediaStream([p.tracks.video.persistentTrack]);
+      if (videoEl) {
+        if (p.tracks.screenVideo && p.tracks.screenVideo.state === 'playable' && p.tracks.screenVideo.persistentTrack) {
+          videoEl.srcObject = new MediaStream([p.tracks.screenVideo.persistentTrack]);
+        } else if (p.tracks.video && p.tracks.video.state === 'playable' && p.tracks.video.persistentTrack) {
+          videoEl.srcObject = new MediaStream([p.tracks.video.persistentTrack]);
+        }
       }
-      // Audio
+      // Audio remains the same
       const audioEl = document.getElementById(`remote-audio-${id}`);
       if (audioEl && p.tracks.audio && p.tracks.audio.state === 'playable' && p.tracks.audio.persistentTrack) {
         audioEl.srcObject = new MediaStream([p.tracks.audio.persistentTrack]);
@@ -417,7 +477,9 @@ function App() {
     // Handle local participant
     if (localParticipant && localVideoRef.current) {
       const localVideo = localVideoRef.current;
-      if (localParticipant.tracks.video && localParticipant.tracks.video.state === 'playable' && localParticipant.tracks.video.persistentTrack) {
+      if (localParticipant.tracks.screenVideo && localParticipant.tracks.screenVideo.state === 'playable' && localParticipant.tracks.screenVideo.persistentTrack) {
+        localVideo.srcObject = new MediaStream([localParticipant.tracks.screenVideo.persistentTrack]);
+      } else if (localParticipant.tracks.video && localParticipant.tracks.video.state === 'playable' && localParticipant.tracks.video.persistentTrack) {
         localVideo.srcObject = new MediaStream([localParticipant.tracks.video.persistentTrack]);
       }
     }
@@ -450,16 +512,31 @@ function App() {
     call.on('participant-left', updateParticipants);
     call.on('app-message', handleAppMessage);
     
+    // Screen share event listeners
+    call.on('started-screen-share', () => {
+      console.log('Screen share started');
+      setIsScreenSharing(true);
+      updateParticipants(); // Update to show screen share track
+    });
+    
+    call.on('stopped-screen-share', () => {
+      console.log('Screen share stopped');
+      setIsScreenSharing(false);
+      updateParticipants(); // Update to remove screen share track
+    });
+    
     call.on('joined-meeting', () => {
       setIsStatusVisible("SUCCESS");
       setStatus('Connected successfully!');
       setIsConversationVisible(true);
+      updateParticipants();
     });
     
     call.on('left-meeting', () => {
       setIsStatusVisible("NEUTRAL");
       setStatus('Disconnected');
       setIsConversationVisible(false);
+      setIsScreenSharing(false);
     });
     
     call.on('error', (error) => {
@@ -475,10 +552,12 @@ function App() {
         call.off('participant-updated', updateParticipants);
         call.off('participant-left', updateParticipants);
         call.off('app-message', handleAppMessage);
+        call.off('started-screen-share', handleScreenShareStarted);
+        call.off('stopped-screen-share', handleScreenShareStopped);
         call.leave();
       }
     };
-  }, [conversationUrl, handleAppMessage]);
+  }, [conversationUrl, handleAppMessage, handleScreenShareStarted, handleScreenShareStopped]);
 
   const joinConversation = () => {
     setIsStatusVisible("NEUTRAL");
@@ -515,6 +594,7 @@ function App() {
     setIsConversationVisible(false);
     setRemoteParticipants({});
     setLocalParticipant(null);
+    setIsScreenSharing(false);
   };
 
   // Cleanup on unmount
@@ -543,6 +623,15 @@ function App() {
             <button className="button" onClick={() => joinConversation()}>Join Call</button>
             {isConversationVisible && (
               <button className="button" onClick={leaveConversation} style={{backgroundColor: '#dc3545'}}>Leave Call</button>
+            )}
+            {isConversationVisible && (
+              <button 
+                className="button" 
+                onClick={toggleScreenShare} 
+                style={{backgroundColor: isScreenSharing ? '#6c757d' : '#28a745'}}
+              >
+                {isScreenSharing ? 'Stop Screen Share' : 'Start Screen Share'}
+              </button>
             )}
           </div>
           <div id="status" className={`fade ${isStatusVisible === "NEUTRAL" ? 'visible neutral' : ( isStatusVisible === "SUCCESS" ? 'visible success' : (isStatusVisible === "FAILED" && 'visible failed'))}`}>{status}</div>
@@ -574,7 +663,7 @@ function App() {
                     width: '100%',
                     height: '100%',
                     objectFit: 'cover',
-                    transform: 'scaleX(-1)'
+                    transform: (localParticipant.tracks.screenVideo && localParticipant.tracks.screenVideo.state === 'playable') ? 'none' : 'scaleX(-1)'
                   }}
                 />
                 <div style={{
@@ -587,8 +676,22 @@ function App() {
                   borderRadius: '4px',
                   fontSize: '14px'
                 }}>
-                  You
+                  {(localParticipant.tracks.screenVideo && localParticipant.tracks.screenVideo.state === 'playable') ? 'Your Screen' : 'You'}
                 </div>
+                {isScreenSharing && (
+                  <div style={{
+                    position: 'absolute',
+                    top: '8px',
+                    right: '8px',
+                    backgroundColor: 'rgba(40, 167, 69, 0.8)',
+                    color: 'white',
+                    padding: '4px 8px',
+                    borderRadius: '4px',
+                    fontSize: '12px'
+                  }}>
+                    Sharing Screen
+                  </div>
+                )}
               </div>
             )}
 
