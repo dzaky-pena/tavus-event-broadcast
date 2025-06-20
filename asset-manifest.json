@@ -1,16 +1,16 @@
 {
   "files": {
     "main.css": "/tavus-event-broadcast/static/css/main.788bb627.css",
-    "main.js": "/tavus-event-broadcast/static/js/main.1e73a6a6.js",
+    "main.js": "/tavus-event-broadcast/static/js/main.c6e94588.js",
     "static/js/453.784a2014.chunk.js": "/tavus-event-broadcast/static/js/453.784a2014.chunk.js",
     "static/media/logo-tavus.png": "/tavus-event-broadcast/static/media/logo-tavus.c4935ae38043e556d517.png",
     "index.html": "/tavus-event-broadcast/index.html",
     "main.788bb627.css.map": "/tavus-event-broadcast/static/css/main.788bb627.css.map",
-    "main.1e73a6a6.js.map": "/tavus-event-broadcast/static/js/main.1e73a6a6.js.map",
+    "main.c6e94588.js.map": "/tavus-event-broadcast/static/js/main.c6e94588.js.map",
     "453.784a2014.chunk.js.map": "/tavus-event-broadcast/static/js/453.784a2014.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.788bb627.css",
-    "static/js/main.1e73a6a6.js"
+    "static/js/main.c6e94588.js"
   ]
 }
